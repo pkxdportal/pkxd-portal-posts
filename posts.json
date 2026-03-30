@@ -12,5 +12,12 @@
     "date": "31.03.2026",
     "author": "@pkxd_portal",
     "description": "Это первая строка"
+  },
+  {
+    "title": "Первый пост через бота",
+    "slug": "hello-world",
+    "date": "31.03.2026",
+    "author": "@pkxd_portal",
+    "description": "Всем привет"
   }
 ]
