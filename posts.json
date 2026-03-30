@@ -7,13 +7,6 @@
     "description": "Это первый тестовый пост. Если ты это видишь — сайт работает правильно."
   },
   {
-    "title": "Мой первый пост",
-    "slug": "test-post",
-    "date": "31.03.2026",
-    "author": "@pkxd_portal",
-    "description": "Это первая строка"
-  },
-  {
     "title": "ДОБРО ПОЖАЛОВАТЬ В PK XD PORTAL",
     "slug": "pkxdportal",
     "date": "31.03.2026",
