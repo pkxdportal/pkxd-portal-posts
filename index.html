@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PK XD PORTAL Posts</title>
+  <title>PK XD PORTAL</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,13 +13,37 @@
       <p class="subtitle">Посты и новости</p>
     </header>
 
-    <main class="post-list">
-      <a class="post-card" href="posts/example.html">
-        <h2>Тестовый пост</h2>
-        <div class="meta">Автор: @pkxd_portal · 31.03.2026</div>
-        <p>Это первый тестовый пост. Если ты это видишь — сайт работает правильно.</p>
-      </a>
-    </main>
+    <main id="post-list" class="post-list"></main>
   </div>
+
+  <script>
+    async function loadPosts() {
+      const list = document.getElementById("post-list");
+
+      try {
+        const response = await fetch("posts.json");
+        const posts = await response.json();
+
+        posts.sort((a, b) => {
+          const [da, ma, ya] = a.date.split(".");
+          const [db, mb, yb] = b.date.split(".");
+          return new Date(`${yb}-${mb}-${db}`) - new Date(`${ya}-${ma}-${da}`);
+        });
+
+        list.innerHTML = posts.map(post => `
+          <a class="post-card" href="posts/${post.slug}.html">
+            <h2>${post.title}</h2>
+            <div class="meta">Автор: ${post.author} · ${post.date}</div>
+            <p>${post.description}</p>
+          </a>
+        `).join("");
+      } catch (error) {
+        list.innerHTML = "<p>Не удалось загрузить посты.</p>";
+        console.error(error);
+      }
+    }
+
+    loadPosts();
+  </script>
 </body>
 </html>
