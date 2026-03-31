@@ -42,20 +42,20 @@ body {
     url("assets/portal-bg.webp");
   background-repeat: no-repeat;
   background-size:
-    170px 170px,
-    130px 130px,
-    150px 150px,
-    110px 110px,
-    125px 125px,
-    95px 95px;
+    160px 160px,
+    120px 120px,
+    135px 135px,
+    100px 100px,
+    115px 115px,
+    85px 85px;
   background-position:
-    right 38px top 120px,
-    left 34px top 430px,
-    right 42px top 760px,
-    left 120px top 190px,
+    right 34px top 130px,
+    left 40px top 430px,
+    right 48px top 760px,
+    left 140px top 180px,
     right 120px bottom 140px,
-    left 22% bottom 90px;
-  opacity: 0.08;
+    left 18% bottom 90px;
+  opacity: 0.06;
 }
 
 .container {
@@ -81,7 +81,7 @@ body {
   width: 64px;
   height: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(128, 243, 255, 0.25));
+  filter: drop-shadow(0 0 18px rgba(128, 243, 255, 0.18));
 }
 
 .hero h1 {
@@ -107,7 +107,7 @@ body {
 .filter-select {
   background: rgba(17, 23, 34, 0.82);
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 14px 16px;
   font-size: 15px;
@@ -225,7 +225,7 @@ body {
 
 .post-page {
   background: rgba(14, 18, 28, 0.78);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
   padding: 28px 24px 32px;
   backdrop-filter: blur(12px);
@@ -268,7 +268,7 @@ body {
 }
 
 .action-btn {
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(18, 24, 36, 0.82);
   color: var(--text);
   border-radius: 14px;
@@ -354,27 +354,28 @@ body {
   }
 
   .page-bg {
-  background-image:
-    url("assets/portal-bg.webp"),
-    url("assets/portal-bg.webp"),
-    url("assets/portal-bg.webp"),
-    url("assets/portal-bg.webp"),
-    url("assets/portal-bg.webp"),
-    url("assets/portal-bg.webp");
-  background-repeat: no-repeat;
-  background-size:
-    105px 105px,
-    82px 82px,
-    92px 92px,
-    72px 72px,
-    84px 84px,
-    64px 64px;
-  background-position:
-    right -12px top 210px,
-    left -10px top 640px,
-    right -14px top 1050px,
-    left 78% top 430px,
-    left 6px bottom 200px,
-    right 14% bottom 90px;
-  opacity: 0.065;
+    background-image:
+      url("assets/portal-bg.webp"),
+      url("assets/portal-bg.webp"),
+      url("assets/portal-bg.webp"),
+      url("assets/portal-bg.webp"),
+      url("assets/portal-bg.webp"),
+      url("assets/portal-bg.webp");
+    background-repeat: no-repeat;
+    background-size:
+      96px 96px,
+      74px 74px,
+      84px 84px,
+      64px 64px,
+      76px 76px,
+      56px 56px;
+    background-position:
+      right -10px top 205px,
+      left -8px top 690px,
+      right -10px top 1080px,
+      left 74% top 430px,
+      left 6px bottom 180px,
+      right 12% bottom 80px;
+    opacity: 0.05;
+  }
 }
