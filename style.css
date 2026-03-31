@@ -260,6 +260,16 @@ body {
   margin: 0 0 1.1em;
 }
 
+.post-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.post-content a:hover {
+  opacity: 0.9;
+}
+
 .post-actions {
   display: flex;
   gap: 10px;
