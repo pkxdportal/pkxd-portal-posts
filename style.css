@@ -37,7 +37,7 @@ body {
 
 .bg-orb {
   position: absolute;
-  background-image: url("assets/portal-bg.png");
+  background-image: url("assets/portal-bg.webp");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
