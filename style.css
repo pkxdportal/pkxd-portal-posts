@@ -41,33 +41,34 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.09;
+  opacity: 0.045;
   filter: blur(0.5px);
+  pointer-events: none;
 }
 
 .orb-1 {
-  width: 520px;
-  height: 520px;
-  top: 40px;
-  right: -80px;
-  transform: rotate(12deg);
+  width: 300px;
+  height: 300px;
+  top: 110px;
+  right: -40px;
+  transform: rotate(10deg);
 }
 
 .orb-2 {
-  width: 380px;
-  height: 380px;
-  left: -90px;
-  top: 340px;
-  transform: rotate(-18deg);
-  opacity: 0.07;
+  width: 240px;
+  height: 240px;
+  left: -70px;
+  top: 560px;
+  transform: rotate(-16deg);
+  opacity: 0.04;
 }
 
 .orb-3 {
-  width: 440px;
-  height: 440px;
-  right: 15%;
-  bottom: -90px;
-  opacity: 0.06;
+  width: 260px;
+  height: 260px;
+  right: 8%;
+  bottom: 120px;
+  opacity: 0.035;
 }
 
 .container {
@@ -314,7 +315,26 @@ body {
     font-size: 1.02rem;
   }
 
-  .orb-1, .orb-2, .orb-3 {
-    opacity: 0.05;
-  }
+.orb-1 {
+  width: 190px;
+  height: 190px;
+  top: 120px;
+  right: -35px;
+  opacity: 0.035;
+}
+
+.orb-2 {
+  width: 150px;
+  height: 150px;
+  left: -45px;
+  top: 640px;
+  opacity: 0.03;
+}
+
+.orb-3 {
+  width: 170px;
+  height: 170px;
+  right: -20px;
+  bottom: 180px;
+  opacity: 0.025;
 }
