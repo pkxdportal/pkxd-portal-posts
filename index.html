@@ -63,38 +63,60 @@
     let allPosts = [];
 
     function parseDate(dateStr) {
+      if (!dateStr || typeof dateStr !== "string" || !dateStr.includes(".")) {
+        return new Date(0);
+      }
+
       const [d, m, y] = dateStr.split(".");
       return new Date(`${y}-${m}-${d}`);
     }
 
     function sortPosts(posts) {
       return [...posts].sort((a, b) => {
-        if ((a.pinned ? 1 : 0) !== (b.pinned ? 1 : 0)) {
-          return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+        const aPinned = Boolean(a?.pinned);
+        const bPinned = Boolean(b?.pinned);
+
+        if (aPinned !== bPinned) {
+          return bPinned - aPinned;
         }
-        return parseDate(b.date) - parseDate(a.date);
+
+        return parseDate(b?.date) - parseDate(a?.date);
       });
     }
 
     function escapeHtml(text) {
-      return String(text)
+      return String(text ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
     }
 
+    function normalizePost(post) {
+      return {
+        title: post?.title || "Без названия",
+        slug: post?.slug || "",
+        date: post?.date || "",
+        author: post?.author || "@pkxd_portal",
+        description: post?.description || "",
+        category: post?.category || "Общее",
+        pinned: Boolean(post?.pinned)
+      };
+    }
+
     function renderCard(post) {
+      const safePost = normalizePost(post);
+
       return `
-        <a class="post-card" href="posts/${encodeURIComponent(post.slug)}.html">
+        <a class="post-card" href="posts/${encodeURIComponent(safePost.slug)}.html">
           <div class="post-card-top">
             <div class="tag-row">
-              <span class="tag">${escapeHtml(post.category || "Общее")}</span>
-              ${post.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
+              <span class="tag">${escapeHtml(safePost.category)}</span>
+              ${safePost.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
             </div>
           </div>
-          <h3>${escapeHtml(post.title)}</h3>
-          <div class="meta">Автор: ${escapeHtml(post.author)} · ${escapeHtml(post.date)}</div>
-          <p>${escapeHtml(post.description || "")}</p>
+          <h3>${escapeHtml(safePost.title)}</h3>
+          <div class="meta">Автор: ${escapeHtml(safePost.author)} · ${escapeHtml(safePost.date)}</div>
+          <p>${escapeHtml(safePost.description)}</p>
         </a>
       `;
     }
@@ -103,10 +125,12 @@
       const search = document.getElementById("searchInput").value.trim().toLowerCase();
       const category = document.getElementById("categoryFilter").value;
 
-      const filtered = sortPosts(allPosts).filter(post => {
-        const title = (post.title || "").toLowerCase();
-        const description = (post.description || "").toLowerCase();
-        const postCategory = (post.category || "Общее").toLowerCase();
+      const filtered = sortPosts(allPosts).filter((rawPost) => {
+        const post = normalizePost(rawPost);
+
+        const title = post.title.toLowerCase();
+        const description = post.description.toLowerCase();
+        const postCategory = post.category.toLowerCase();
 
         const matchSearch =
           title.includes(search) ||
@@ -114,7 +138,7 @@
           postCategory.includes(search);
 
         const matchCategory =
-          category === "all" || (post.category || "Общее") === category;
+          category === "all" || post.category === category;
 
         return matchSearch && matchCategory;
       });
@@ -142,10 +166,11 @@
 
     function fillCategories(posts) {
       const select = document.getElementById("categoryFilter");
-
       select.innerHTML = `<option value="all">Все категории</option>`;
 
-      const categories = [...new Set(posts.map(p => p.category || "Общее"))].sort();
+      const categories = [
+        ...new Set(posts.map(post => normalizePost(post).category))
+      ].sort((a, b) => a.localeCompare(b, "ru"));
 
       for (const cat of categories) {
         const option = document.createElement("option");
@@ -157,15 +182,33 @@
 
     async function loadPosts() {
       try {
-        const response = await fetch(`posts.json?v=${Date.now()}`, { cache: "no-store" });
-        allPosts = await response.json();
+        const response = await fetch(`posts.json?t=${Date.now()}`, {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("posts.json должен быть массивом");
+        }
+
+        allPosts = data.map(normalizePost);
 
         fillCategories(allPosts);
         renderPosts();
       } catch (e) {
+        document.getElementById("pinnedSection").classList.add("hidden");
         document.getElementById("postList").innerHTML =
           `<div class="empty-state">Не удалось загрузить посты.</div>`;
-        console.error(e);
+        console.error("Ошибка загрузки posts.json:", e);
       }
     }
 
