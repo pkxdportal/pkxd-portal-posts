@@ -42,63 +42,64 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
-  filter: blur(0.3px);
-  opacity: 0.04;
+  filter: blur(0.2px);
+  opacity: 0.028;
 }
 
-/* Desktop / tablet */
+/* ===== DESKTOP / TABLET ===== */
+
 .orb-1 {
-  width: 240px;
-  height: 240px;
-  top: 70px;
-  right: 40px;
-  opacity: 0.045;
+  width: 180px;
+  height: 180px;
+  top: 110px;
+  right: 42px;
+  opacity: 0.03;
   transform: rotate(10deg);
 }
 
 .orb-2 {
-  width: 180px;
-  height: 180px;
-  top: 520px;
-  left: 30px;
-  opacity: 0.035;
-  transform: rotate(-18deg);
+  width: 150px;
+  height: 150px;
+  top: 470px;
+  right: 8px;
+  opacity: 0.024;
+  transform: rotate(-14deg);
 }
 
 .orb-3 {
-  width: 210px;
-  height: 210px;
-  top: 980px;
-  right: 80px;
-  opacity: 0.03;
+  width: 135px;
+  height: 135px;
+  top: 760px;
+  left: 36px;
+  opacity: 0.02;
   transform: rotate(16deg);
 }
 
 .orb-4 {
-  width: 150px;
-  height: 150px;
-  top: 260px;
-  left: 58%;
-  opacity: 0.025;
+  width: 120px;
+  height: 120px;
+  top: 980px;
+  right: 90px;
+  opacity: 0.018;
   transform: rotate(-10deg);
 }
 
 .orb-5 {
-  width: 170px;
-  height: 170px;
-  top: 1380px;
-  left: 90px;
-  opacity: 0.028;
-  transform: rotate(22deg);
+  width: 105px;
+  height: 105px;
+  top: 260px;
+  left: 130px;
+  opacity: 0.015;
+  transform: rotate(20deg);
 }
 
 .orb-6 {
-  width: 130px;
-  height: 130px;
-  top: 1700px;
-  right: 14%;
-  opacity: 0.022;
-  transform: rotate(-12deg);
+  width: 95px;
+  height: 95px;
+  top: 1320px;
+  left: 18%;
+  opacity: 0.014;
+  transform: rotate(-18deg);
 }
 
 .container {
@@ -326,75 +327,127 @@ body {
 }
 
 @media (max-width: 700px) {
+  .container {
+    padding: 28px 16px 52px;
+  }
+
+  .hero {
+    margin-bottom: 22px;
+  }
+
+  .hero-top {
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
   .hero h1 {
-    font-size: 2.3rem;
+    font-size: 2rem;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.98rem;
+    margin-top: 8px;
   }
 
   .hero-icon {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .toolbar {
+    gap: 10px;
+  }
+
+  .search-input,
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 14px;
+    font-size: 14px;
+  }
+
+  .post-card {
+    padding: 20px 18px;
+    border-radius: 22px;
   }
 
   .post-card h3,
   .post-page h1 {
-    font-size: 1.8rem;
+    font-size: 1.55rem;
+    line-height: 1.04;
   }
 
   .post-card p,
   .post-content {
-    font-size: 1.02rem;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .meta {
+    font-size: 13px;
+  }
+
+  .tag {
+    font-size: 12px;
+    min-height: 26px;
+    padding: 0 11px;
   }
 
   .bg-orb {
-    filter: blur(0.2px);
+    filter: blur(0.1px);
   }
 
-  /* Мобильное ручное распределение порталов */
+  /* ===== MOBILE LAYOUT ===== */
+
   .orb-1 {
-    width: 135px;
-    height: 135px;
-    top: 95px;
-    right: -28px;
-    opacity: 0.03;
-  }
-
-  .orb-2 {
-    width: 115px;
-    height: 115px;
-    top: 620px;
-    left: -28px;
-    opacity: 0.024;
-  }
-
-  .orb-3 {
-    width: 125px;
-    height: 125px;
-    top: 1080px;
+    width: 110px;
+    height: 110px;
+    top: 155px;
     right: -18px;
-    opacity: 0.022;
-  }
-
-  .orb-4 {
-    width: 90px;
-    height: 90px;
-    top: 360px;
-    left: 58%;
-    opacity: 0.018;
-  }
-
-  .orb-5 {
-    width: 105px;
-    height: 105px;
-    top: 1460px;
-    left: 8px;
     opacity: 0.02;
   }
 
-  .orb-6 {
-    width: 88px;
-    height: 88px;
-    top: 1880px;
-    right: 12%;
+  .orb-2 {
+    width: 92px;
+    height: 92px;
+    top: 690px;
+    left: -24px;
     opacity: 0.016;
+  }
+
+  .orb-3 {
+    width: 96px;
+    height: 96px;
+    top: 1120px;
+    right: -16px;
+    opacity: 0.014;
+  }
+
+  .orb-4 {
+    width: 72px;
+    height: 72px;
+    top: 410px;
+    left: 66%;
+    opacity: 0.012;
+  }
+
+  .orb-5 {
+    width: 82px;
+    height: 82px;
+    top: 1480px;
+    left: 8px;
+    opacity: 0.012;
+  }
+
+  .orb-6 {
+    width: 68px;
+    height: 68px;
+    top: 1860px;
+    right: 10%;
+    opacity: 0.01;
   }
 }
