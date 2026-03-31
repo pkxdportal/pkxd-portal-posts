@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ДОБРО ПОЖАЛОВАТЬ В PK XD PORTAL</title>
+  <meta name="description" content="PK XD PORTAL это сообщество, посвящённое игре PK XD. Здесь вы увидите новости, события, трейды, общение и творчество участников." />
+  <meta property="og:title" content="ДОБРО ПОЖАЛОВАТЬ В PK XD PORTAL" />
+  <meta property="og:description" content="PK XD PORTAL это сообщество, посвящённое игре PK XD. Здесь вы увидите новости, события, трейды, общение и творчество участников." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://pkxdportal.github.io/pkxd-portal-posts/posts/добро-пожаловать-в-pk-xd-portal.html" />
+  <meta property="og:image" content="https://pkxdportal.github.io/pkxd-portal-posts/assets/portal-badge.png" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="page-bg">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+  </div>
+
+  <div class="post-page-wrap">
+    <div class="post-page">
+      <a class="back-link" href="../index.html">← Назад</a>
+
+      <div class="tag-row">
+        <span class="tag">Навигация</span>
+        <span class="tag pin-tag">Закреплено</span>
+      </div>
+
+      <h1>ДОБРО ПОЖАЛОВАТЬ В PK XD PORTAL</h1>
+      <div class="meta">Автор: @pkxd_portal · 31.03.2026</div>
+
+      <div class="post-content">
+        <p>PK XD PORTAL это сообщество, посвящённое игре PK XD. Здесь вы увидите новости, события, трейды, общение и творчество участников.</p><p>Мы стараемся сделать Портал живым и удобным, чтобы сюда хотелось возвращаться.</p><p>📌 Что вас ждёт:</p><p>➤ Всё о портале</p><p>➤ Всё о мире PK XD</p><p>➤ Обсуждения обновлений</p><p>➤ Конкурсы и идеи от участников</p><p>🤩🤩🤩 Что есть в Портале:</p><p>➤ PK XD PORTAL — здесь выходят новости, фан-арты и вся основная информация, плюс общение</p><p>➤ PK XD PORTAL TRADES — место для безопасных обменов с системой доверия</p><p>➤ PK XD PORTAL GAMES — здесь проходят игровые события, активности и мини-игры</p><p>📂 Все каналы и чаты портала в одном месте:</p><p>https://t.me/addlist/aw6pZH4f0R01ZDUy</p><p>Просто перейдите по ссылке и нажмите «Добавить» — все каналы и чаты появятся у вас автоматически.</p><p>🛡 Всё о владельцах портала:</p><p>https://t.me/bio_owners_pkxdportal</p><p>💬 Что дальше:</p><p>Ознакомьтесь с правилами и навигацией: https://t.me/pkxd_portal/6793</p><p>🤩 Мы поддерживаем уважительное общение и активное участие. Спасибо, что вы с нами 🤩</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" id="likeBtn">❤️ Нравится</button>
+        <button class="action-btn" id="copyBtn">🔗 Копировать ссылку</button>
+        <span class="like-count" id="likeCount">Лайков: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slug = "добро-пожаловать-в-pk-xd-portal";
+    const likeKey = "likes_" + slug;
+    const likedKey = "liked_" + slug;
+
+    const countEl = document.getElementById("likeCount");
+    const likeBtn = document.getElementById("likeBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function refreshLikes() {
+      const count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+      const liked = localStorage.getItem(likedKey) === "1";
+      countEl.textContent = "Лайков: " + count;
+      likeBtn.textContent = liked ? "💖 Лайк поставлен" : "❤️ Нравится";
+    }
+
+    likeBtn.addEventListener("click", () => {
+      const liked = localStorage.getItem(likedKey) === "1";
+      let count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+
+      if (liked) {
+        count = Math.max(0, count - 1);
+        localStorage.setItem(likedKey, "0");
+      } else {
+        count += 1;
+        localStorage.setItem(likedKey, "1");
+      }
+
+      localStorage.setItem(likeKey, String(count));
+      refreshLikes();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyBtn.textContent = "✅ Ссылка скопирована";
+        setTimeout(() => copyBtn.textContent = "🔗 Копировать ссылку", 1800);
+      } catch (e) {
+        alert("Не удалось скопировать ссылку");
+      }
+    });
+
+    refreshLikes();
+  </script>
+</body>
+</html>
