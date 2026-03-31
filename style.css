@@ -33,73 +33,29 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-}
-
-.bg-orb {
-  position: absolute;
-  background-image: url("assets/portal-bg.webp");
-  background-size: contain;
+  background-image:
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp");
   background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
-  filter: blur(0.2px);
-  opacity: 0.028;
-}
-
-/* ===== DESKTOP / TABLET ===== */
-
-.orb-1 {
-  width: 180px;
-  height: 180px;
-  top: 110px;
-  right: 42px;
-  opacity: 0.03;
-  transform: rotate(10deg);
-}
-
-.orb-2 {
-  width: 150px;
-  height: 150px;
-  top: 470px;
-  right: 8px;
-  opacity: 0.024;
-  transform: rotate(-14deg);
-}
-
-.orb-3 {
-  width: 135px;
-  height: 135px;
-  top: 760px;
-  left: 36px;
-  opacity: 0.02;
-  transform: rotate(16deg);
-}
-
-.orb-4 {
-  width: 120px;
-  height: 120px;
-  top: 980px;
-  right: 90px;
-  opacity: 0.018;
-  transform: rotate(-10deg);
-}
-
-.orb-5 {
-  width: 105px;
-  height: 105px;
-  top: 260px;
-  left: 130px;
-  opacity: 0.015;
-  transform: rotate(20deg);
-}
-
-.orb-6 {
-  width: 95px;
-  height: 95px;
-  top: 1320px;
-  left: 18%;
-  opacity: 0.014;
-  transform: rotate(-18deg);
+  background-size:
+    170px 170px,
+    130px 130px,
+    150px 150px,
+    110px 110px,
+    125px 125px,
+    95px 95px;
+  background-position:
+    right 38px top 120px,
+    left 34px top 430px,
+    right 42px top 760px,
+    left 120px top 190px,
+    right 120px bottom 140px,
+    left 22% bottom 90px;
+  opacity: 0.08;
 }
 
 .container {
@@ -397,57 +353,28 @@ body {
     padding: 0 11px;
   }
 
-  .bg-orb {
-    filter: blur(0.1px);
-  }
-
-  /* ===== MOBILE LAYOUT ===== */
-
-  .orb-1 {
-    width: 110px;
-    height: 110px;
-    top: 155px;
-    right: -18px;
-    opacity: 0.02;
-  }
-
-  .orb-2 {
-    width: 92px;
-    height: 92px;
-    top: 690px;
-    left: -24px;
-    opacity: 0.016;
-  }
-
-  .orb-3 {
-    width: 96px;
-    height: 96px;
-    top: 1120px;
-    right: -16px;
-    opacity: 0.014;
-  }
-
-  .orb-4 {
-    width: 72px;
-    height: 72px;
-    top: 410px;
-    left: 66%;
-    opacity: 0.012;
-  }
-
-  .orb-5 {
-    width: 82px;
-    height: 82px;
-    top: 1480px;
-    left: 8px;
-    opacity: 0.012;
-  }
-
-  .orb-6 {
-    width: 68px;
-    height: 68px;
-    top: 1860px;
-    right: 10%;
-    opacity: 0.01;
-  }
+  .page-bg {
+  background-image:
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp"),
+    url("assets/portal-bg.webp");
+  background-repeat: no-repeat;
+  background-size:
+    105px 105px,
+    82px 82px,
+    92px 92px,
+    72px 72px,
+    84px 84px,
+    64px 64px;
+  background-position:
+    right -12px top 210px,
+    left -10px top 640px,
+    right -14px top 1050px,
+    left 78% top 430px,
+    left 6px bottom 200px,
+    right 14% bottom 90px;
+  opacity: 0.065;
 }
