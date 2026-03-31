@@ -3,23 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>PK XD PORTAL — Посты и новости</title>
   <meta name="description" content="Посты и новости PK XD PORTAL" />
+
   <meta property="og:title" content="PK XD PORTAL — Посты и новости" />
   <meta property="og:description" content="Новости, события, посты и обновления PK XD PORTAL" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://pkxdportal.github.io/pkxd-portal-posts/" />
   <meta property="og:image" content="https://pkxdportal.github.io/pkxd-portal-posts/assets/portal-badge.png" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="page-bg">
-</div>
+  <div class="page-bg"></div>
 
   <div class="container">
     <header class="hero">
       <div class="hero-top">
-        <img src="assets/portal-badge.png" alt="Portal" class="hero-icon" />
+        <img
+          src="assets/portal-badge.png"
+          alt="Portal"
+          class="hero-icon"
+        />
         <div>
           <h1>PK XD PORTAL</h1>
           <p class="subtitle">Посты и новости</p>
@@ -27,7 +33,13 @@
       </div>
 
       <div class="toolbar">
-        <input id="searchInput" type="text" placeholder="Поиск по постам..." class="search-input" />
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Поиск по постам..."
+          class="search-input"
+        />
+
         <select id="categoryFilter" class="filter-select">
           <option value="all">Все категории</option>
         </select>
@@ -71,17 +83,39 @@
         .replace(/>/g, "&gt;");
     }
 
+    function renderCard(post) {
+      return `
+        <a class="post-card" href="posts/${encodeURIComponent(post.slug)}.html">
+          <div class="post-card-top">
+            <div class="tag-row">
+              <span class="tag">${escapeHtml(post.category || "Общее")}</span>
+              ${post.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
+            </div>
+          </div>
+          <h3>${escapeHtml(post.title)}</h3>
+          <div class="meta">Автор: ${escapeHtml(post.author)} · ${escapeHtml(post.date)}</div>
+          <p>${escapeHtml(post.description || "")}</p>
+        </a>
+      `;
+    }
+
     function renderPosts() {
       const search = document.getElementById("searchInput").value.trim().toLowerCase();
       const category = document.getElementById("categoryFilter").value;
 
       const filtered = sortPosts(allPosts).filter(post => {
-        const matchSearch =
-          post.title.toLowerCase().includes(search) ||
-          post.description.toLowerCase().includes(search) ||
-          (post.category || "").toLowerCase().includes(search);
+        const title = (post.title || "").toLowerCase();
+        const description = (post.description || "").toLowerCase();
+        const postCategory = (post.category || "Общее").toLowerCase();
 
-        const matchCategory = category === "all" || (post.category || "Общее") === category;
+        const matchSearch =
+          title.includes(search) ||
+          description.includes(search) ||
+          postCategory.includes(search);
+
+        const matchCategory =
+          category === "all" || (post.category || "Общее") === category;
+
         return matchSearch && matchCategory;
       });
 
@@ -106,24 +140,11 @@
       }
     }
 
-    function renderCard(post) {
-      return `
-        <a class="post-card" href="posts/${encodeURIComponent(post.slug)}.html">
-          <div class="post-card-top">
-            <div class="tag-row">
-              <span class="tag">${escapeHtml(post.category || "Общее")}</span>
-              ${post.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
-            </div>
-          </div>
-          <h3>${escapeHtml(post.title)}</h3>
-          <div class="meta">Автор: ${escapeHtml(post.author)} · ${escapeHtml(post.date)}</div>
-          <p>${escapeHtml(post.description)}</p>
-        </a>
-      `;
-    }
-
     function fillCategories(posts) {
       const select = document.getElementById("categoryFilter");
+
+      select.innerHTML = `<option value="all">Все категории</option>`;
+
       const categories = [...new Set(posts.map(p => p.category || "Общее"))].sort();
 
       for (const cat of categories) {
@@ -138,6 +159,7 @@
       try {
         const response = await fetch("posts.json");
         allPosts = await response.json();
+
         fillCategories(allPosts);
         renderPosts();
       } catch (e) {
