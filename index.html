@@ -3,45 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PK XD PORTAL</title>
+  <title>PK XD PORTAL — Посты и новости</title>
+  <meta name="description" content="Посты и новости PK XD PORTAL" />
+  <meta property="og:title" content="PK XD PORTAL — Посты и новости" />
+  <meta property="og:description" content="Новости, события, посты и обновления PK XD PORTAL" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pkxdportal.github.io/pkxd-portal-posts/" />
+  <meta property="og:image" content="https://pkxdportal.github.io/pkxd-portal-posts/assets/portal-badge.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="page-bg">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+  </div>
+
   <div class="container">
-    <header class="site-header">
-      <h1>PK XD PORTAL</h1>
-      <p class="subtitle">Посты и новости</p>
+    <header class="hero">
+      <div class="hero-top">
+        <img src="assets/portal-badge.png" alt="Portal" class="hero-icon" />
+        <div>
+          <h1>PK XD PORTAL</h1>
+          <p class="subtitle">Посты и новости</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="Поиск по постам..." class="search-input" />
+        <select id="categoryFilter" class="filter-select">
+          <option value="all">Все категории</option>
+        </select>
+      </div>
     </header>
 
-    <main id="post-list" class="post-list"></main>
+    <main>
+      <section id="pinnedSection" class="section hidden">
+        <h2 class="section-title">Закреплённые</h2>
+        <div id="pinnedList" class="post-list"></div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">Все посты</h2>
+        <div id="postList" class="post-list"></div>
+      </section>
+    </main>
   </div>
 
   <script>
-    async function loadPosts() {
-      const list = document.getElementById("post-list");
+    let allPosts = [];
 
-      try {
-        const response = await fetch("posts.json");
-        const posts = await response.json();
+    function parseDate(dateStr) {
+      const [d, m, y] = dateStr.split(".");
+      return new Date(`${y}-${m}-${d}`);
+    }
 
-        posts.sort((a, b) => {
-          const [da, ma, ya] = a.date.split(".");
-          const [db, mb, yb] = b.date.split(".");
-          return new Date(`${yb}-${mb}-${db}`) - new Date(`${ya}-${ma}-${da}`);
-        });
+    function sortPosts(posts) {
+      return [...posts].sort((a, b) => {
+        if ((a.pinned ? 1 : 0) !== (b.pinned ? 1 : 0)) {
+          return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+        }
+        return parseDate(b.date) - parseDate(a.date);
+      });
+    }
 
-        list.innerHTML = posts.map(post => `
-          <a class="post-card" href="posts/${post.slug}.html">
-            <h2>${post.title}</h2>
-            <div class="meta">Автор: ${post.author} · ${post.date}</div>
-            <p>${post.description}</p>
-          </a>
-        `).join("");
-      } catch (error) {
-        list.innerHTML = "<p>Не удалось загрузить посты.</p>";
-        console.error(error);
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function renderPosts() {
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const category = document.getElementById("categoryFilter").value;
+
+      const filtered = sortPosts(allPosts).filter(post => {
+        const matchSearch =
+          post.title.toLowerCase().includes(search) ||
+          post.description.toLowerCase().includes(search) ||
+          (post.category || "").toLowerCase().includes(search);
+
+        const matchCategory = category === "all" || (post.category || "Общее") === category;
+        return matchSearch && matchCategory;
+      });
+
+      const pinned = filtered.filter(post => post.pinned);
+      const regular = filtered.filter(post => !post.pinned);
+
+      const pinnedSection = document.getElementById("pinnedSection");
+      const pinnedList = document.getElementById("pinnedList");
+      const postList = document.getElementById("postList");
+
+      pinnedList.innerHTML = pinned.map(renderCard).join("");
+      postList.innerHTML = regular.map(renderCard).join("");
+
+      if (pinned.length > 0) {
+        pinnedSection.classList.remove("hidden");
+      } else {
+        pinnedSection.classList.add("hidden");
+      }
+
+      if (regular.length === 0 && pinned.length === 0) {
+        postList.innerHTML = `<div class="empty-state">Ничего не найдено.</div>`;
       }
     }
+
+    function renderCard(post) {
+      return `
+        <a class="post-card" href="posts/${encodeURIComponent(post.slug)}.html">
+          <div class="post-card-top">
+            <div class="tag-row">
+              <span class="tag">${escapeHtml(post.category || "Общее")}</span>
+              ${post.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
+            </div>
+          </div>
+          <h3>${escapeHtml(post.title)}</h3>
+          <div class="meta">Автор: ${escapeHtml(post.author)} · ${escapeHtml(post.date)}</div>
+          <p>${escapeHtml(post.description)}</p>
+        </a>
+      `;
+    }
+
+    function fillCategories(posts) {
+      const select = document.getElementById("categoryFilter");
+      const categories = [...new Set(posts.map(p => p.category || "Общее"))].sort();
+
+      for (const cat of categories) {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      }
+    }
+
+    async function loadPosts() {
+      try {
+        const response = await fetch("posts.json");
+        allPosts = await response.json();
+        fillCategories(allPosts);
+        renderPosts();
+      } catch (e) {
+        document.getElementById("postList").innerHTML =
+          `<div class="empty-state">Не удалось загрузить посты.</div>`;
+        console.error(e);
+      }
+    }
+
+    document.getElementById("searchInput").addEventListener("input", renderPosts);
+    document.getElementById("categoryFilter").addEventListener("change", renderPosts);
 
     loadPosts();
   </script>
