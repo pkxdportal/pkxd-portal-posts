@@ -3,16 +3,15 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/login") {
-      const clientId = env.GITHUB_CLIENT_ID;
-
       return Response.redirect(
-        https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo,
+        https://github.com/login/oauth/authorize?client_id=${env.GITHUB_CLIENT_ID}&scope=repo,
         302
       );
     }
 
     if (url.pathname === "/callback") {
       const code = url.searchParams.get("code");
+
       if (!code) {
         return new Response("Missing code", { status: 400 });
       }
@@ -63,7 +62,11 @@ export default {
           </body>
         </html>
         `,
-        { headers: { "Content-Type": "text/html; charset=UTF-8" } }
+        {
+          headers: {
+            "Content-Type": "text/html; charset=UTF-8"
+          }
+        }
       );
     }
 
