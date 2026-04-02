@@ -16,7 +16,7 @@ export default {
         return new Response("Missing code", { status: 400 });
       }
 
-      const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      const tokenRes = await fetch(`https://github.com/login/oauth/access_token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
