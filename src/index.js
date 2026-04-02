@@ -2,13 +2,17 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // === LOGIN ===
     if (url.pathname === "/login") {
-      return Response.redirect(
-        https://github.com/login/oauth/authorize?client_id=${env.GITHUB_CLIENT_ID}&scope=repo,
-        302
-      );
+      const loginUrl =
+        "https://github.com/login/oauth/authorize?client_id=" +
+        encodeURIComponent(env.GITHUB_CLIENT_ID) +
+        "&scope=repo";
+
+      return Response.redirect(loginUrl, 302);
     }
 
+    // === CALLBACK ===
     if (url.pathname === "/callback") {
       const code = url.searchParams.get("code");
 
@@ -16,7 +20,7 @@ export default {
         return new Response("Missing code", { status: 400 });
       }
 
-      const tokenRes = await fetch(`https://github.com/login/oauth/access_token`, {
+      const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +42,7 @@ export default {
 
       const userRes = await fetch("https://api.github.com/user", {
         headers: {
-          "Authorization": Bearer ${accessToken},
+          "Authorization": `Bearer ${accessToken}`,
           "User-Agent": "pkxd-auth-worker"
         }
       });
