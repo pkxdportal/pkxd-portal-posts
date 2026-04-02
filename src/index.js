@@ -2,7 +2,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // === LOGIN ===
     if (url.pathname === "/login") {
       const loginUrl =
         "https://github.com/login/oauth/authorize?client_id=" +
@@ -12,7 +11,6 @@ export default {
       return Response.redirect(loginUrl, 302);
     }
 
-    // === CALLBACK ===
     if (url.pathname === "/callback") {
       const code = url.searchParams.get("code");
 
