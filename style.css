@@ -73,8 +73,17 @@ body {
 .hero-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.hero-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
 }
 
 .hero-icon {
@@ -95,6 +104,30 @@ body {
   margin: 10px 0 0;
   color: var(--muted);
   font-size: 1.1rem;
+}
+
+.owner-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.owner-btn {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 24, 36, 0.82);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.owner-btn:hover {
+  border-color: rgba(128, 243, 255, 0.22);
+  transform: translateY(-1px);
 }
 
 .toolbar {
@@ -203,7 +236,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .empty-state {
@@ -302,9 +335,13 @@ body {
   }
 
   .hero-top {
-    align-items: center;
     gap: 12px;
     margin-bottom: 18px;
+  }
+
+  .hero-title-wrap {
+    width: 100%;
+    gap: 12px;
   }
 
   .hero h1 {
@@ -322,6 +359,17 @@ body {
     width: 44px;
     height: 44px;
     flex-shrink: 0;
+  }
+
+  .owner-actions {
+    width: 100%;
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .owner-btn {
+    width: 100%;
   }
 
   .toolbar {
