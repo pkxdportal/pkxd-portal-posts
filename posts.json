@@ -1,21 +1,21 @@
 [
   {
-    "title": "Тестовый пост",
-    "slug": "example",
-    "date": "31.03.2026",
-    "author": "@pkxd_portal",
-    "description": "Это первый тестовый пост. Если ты это видишь — сайт работает правильно.",
-    "category": "Общее",
-    "pinned": false,
-    "image": ""
-  },
-  {
     "title": "Добро пожаловать в PK XD PORTAL",
     "slug": "добро-пожаловать-в-pk-xd-portal",
     "date": "31.03.2026",
     "author": "@pkxd_portal",
     "description": "PK XD PORTAL это сообщество, посвящённое игре PK XD. Здесь вы увидите новости, события, трейды, общение и творчество участников.",
     "category": "Главное",
+    "pinned": true,
+    "image": ""
+  },
+  {
+    "title": "Тестовый пост",
+    "slug": "example",
+    "date": "31.03.2026",
+    "author": "@pkxd_portal",
+    "description": "Это первый тестовый пост. Если ты это видишь — сайт работает правильно.",
+    "category": "Общее",
     "pinned": false,
     "image": ""
   }
