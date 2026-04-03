@@ -71,29 +71,12 @@ export default {
         return new Response("Нет доступа", { status: 403 });
       }
 
-      return new Response(
-        `
-        <!doctype html>
-        <html lang="ru">
-          <head>
-            <meta charset="UTF-8" />
-            <title>Авторизация...</title>
-          </head>
-          <body>
-            <script>
-              localStorage.setItem("gh_token", ${JSON.stringify(accessToken)});
-              localStorage.setItem("gh_login", ${JSON.stringify(user.login || "")});
-              window.location.href = "https://pkxdportal.github.io/pkxd-portal-posts/";
-            </script>
-          </body>
-        </html>
-        `,
-        {
-          headers: {
-            "Content-Type": "text/html; charset=UTF-8"
-          }
-        }
-      );
+      const targetUrl =
+        "https://pkxdportal.github.io/pkxd-portal-posts/" +
+        "#gh_token=" + encodeURIComponent(accessToken) +
+        "&gh_login=" + encodeURIComponent(user.login || "");
+
+      return Response.redirect(targetUrl, 302);
     }
 
     return new Response("Auth worker работает");
