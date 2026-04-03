@@ -144,6 +144,14 @@ body {
   background: rgba(18, 24, 36, 0.82);
 }
 
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.owner-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .toolbar {
   display: flex;
   gap: 12px;
@@ -163,6 +171,12 @@ body {
   outline: none;
   box-shadow: var(--shadow);
   width: 100%;
+}
+
+.search-input::placeholder,
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: rgba(172, 183, 209, 0.72);
 }
 
 .form-textarea {
@@ -204,6 +218,7 @@ body {
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
 }
 
 .post-card:hover {
@@ -232,6 +247,7 @@ body {
   margin: 0 0 10px;
   font-size: 2rem;
   line-height: 1.05;
+  padding-right: 48px;
 }
 
 .post-card p {
@@ -256,12 +272,12 @@ body {
   font-size: 22px;
   line-height: 1;
   z-index: 2;
+  align-items: center;
+  justify-content: center;
 }
 
 body.admin .post-more-btn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .meta {
@@ -307,6 +323,7 @@ body.admin .post-more-btn {
   color: var(--muted);
 }
 
+/* modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -317,22 +334,27 @@ body.admin .post-more-btn {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
 }
 
 .modal-card {
   width: 100%;
   max-width: 840px;
+  max-height: calc(100vh - 40px);
   background: rgba(14, 18, 28, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
   box-shadow: var(--shadow);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header,
 .modal-footer {
   padding: 18px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .modal-footer {
@@ -352,6 +374,7 @@ body.admin .post-more-btn {
 .modal-header h2 {
   margin: 0;
   font-size: 1.3rem;
+  padding-right: 12px;
 }
 
 .modal-close {
@@ -360,6 +383,7 @@ body.admin .post-more-btn {
   color: var(--text);
   cursor: pointer;
   font-size: 22px;
+  flex-shrink: 0;
 }
 
 .modal-body {
@@ -367,6 +391,7 @@ body.admin .post-more-btn {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
 }
 
 .form-label {
@@ -391,10 +416,16 @@ body.admin .post-more-btn {
   padding-top: 30px;
 }
 
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
 .image-tools {
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: 10px;
+  align-items: center;
 }
 
 .image-preview-wrap {
@@ -414,6 +445,7 @@ body.admin .post-more-btn {
   position: absolute;
   z-index: 50;
   min-width: 180px;
+  max-width: calc(100vw - 24px);
   padding: 8px;
   background: rgba(14, 18, 28, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -592,7 +624,9 @@ body.admin .post-more-btn {
   }
 
   .search-input,
-  .filter-select {
+  .filter-select,
+  .form-input,
+  .form-textarea {
     width: 100%;
     min-width: 0;
     padding: 14px 14px;
@@ -629,6 +663,44 @@ body.admin .post-more-btn {
   .form-grid,
   .image-tools {
     grid-template-columns: 1fr;
+  }
+
+  .checkbox-label {
+    padding-top: 4px;
+  }
+
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modal-card {
+    max-height: calc(100vh - 24px);
+    border-radius: 22px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 14px 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .post-more-btn {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .admin-menu {
+    min-width: 160px;
   }
 
   .page-bg {
