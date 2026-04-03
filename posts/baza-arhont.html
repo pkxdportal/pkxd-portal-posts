@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>БАЗА АРХОНТА PK XD PORTAL</title>
+  <meta name="description" content="Как стать архонтом в PK XD PORTAL" />
+  <meta property="og:title" content="БАЗА АРХОНТА PK XD PORTAL" />
+  <meta property="og:description" content="Как стать архонтом в PK XD PORTAL" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://pkxdportal.github.io/pkxd-portal-posts/posts/baza-arhont.html" />
+  <meta property="og:image" content="https://pkxdportal.github.io/pkxd-portal-posts/assets/portal-badge.png" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="post-page-wrap">
+    <div class="post-page">
+      <a class="back-link" href="../index.html">← Назад</a>
+
+      <div class="tag-row">
+        <span class="tag">Помощь порталу</span>
+        
+      </div>
+
+      
+
+      <h1>БАЗА АРХОНТА PK XD PORTAL</h1>
+      <div class="meta">Автор: @pkxd_portal · 03.04.2026</div>
+
+      <div class="post-content">
+        <p>1. Кто такой Архонт</p><p>Архонт — это помощник владельцев и следующий уровень после админа.</p><p>Он помогает развивать Портал, участвует в идеях, событиях и иногда создаёт посты для канала.</p><p>Архонт — это не просто активный участник.</p><p>Это человек, который начинает брать ответственность за развитие Портала.</p><p>2. Правила Архонтов</p><p>➤ Если ты 4 недели ничего не делал для Портала — понижение до админа</p><p>➤ Можно взять отдых 1 неделю в месяц (предупредив заранее)</p><p>➤ Нельзя сливать внутреннюю информацию и материалы</p><p>➤ Нельзя токсичить, провоцировать конфликты или унижать участников</p><p>➤ Все спорные ситуации решаются спокойно и через диалог</p><p>Архонт должен подавать пример админам и участникам.</p><p>3. Что делает Архонт</p><p>➤ Помогает владельцам с идеями и развитием Портала</p><p>➤ Участвует в создании событий</p><p>➤ Может помогать делать посты для канала</p><p>➤ Помогает админам в сложных ситуациях</p><p>➤ Предлагает улучшения для Портала</p><p>Архонт — это мост между админами и владельцами.</p><p>4. Направления Архонтов</p><p>Архонт может помогать в разных направлениях:</p><p>➤ Событие-мейкер — помощь в создании событий, заданиях, сюжетах и идеях</p><p>➤ Дизайнер — делать визуалы и оформление.</p><p>➤ Инфо-куратор — выкладывать новости и акции PK XD и Портала.</p><p>➤ Питомцевед — изменять баланс доверия, помогать в трейдах и выкладывать гайды в трейд канале.</p><p>➤ Контент — помощь в создании постов</p><p>➤ Исследования — поиск идей, ресурсов и материалов</p><p>➤ Помощь админам — поддержка в сложных ситуациях</p><p>Можно участвовать в 1–2 направлениях, где тебе комфортно помогать.</p><p>5. Стандарты работы</p><p>Каждый архонт обязан:</p><p>➤ Быть активным</p><p>➤ Помогать развитию Портала</p><p>➤ Участвовать в обсуждении идей</p><p>➤ Выполнять задачи владельцев</p><p>➤ Поддерживать порядок и атмосферу команды</p><p>6. KPI Архонта</p><p>Хороший архонт:</p><p>➤ Активен</p><p>➤ Помогает владельцам</p><p>➤ Предлагает идеи</p><p>➤ Помогает админам</p><p>➤ Готов брать больше ответственности</p><p>Если архонт показывает стабильность и вклад — он может стать кандидатом в владельцы.</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" id="likeBtn">❤️ Нравится</button>
+        <button class="action-btn" id="copyBtn">🔗 Копировать ссылку</button>
+        <span class="like-count" id="likeCount">Лайков: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slug = "baza-arhont";
+    const likeKey = "likes_" + slug;
+    const likedKey = "liked_" + slug;
+
+    const countEl = document.getElementById("likeCount");
+    const likeBtn = document.getElementById("likeBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function refreshLikes() {
+      const count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+      const liked = localStorage.getItem(likedKey) === "1";
+      countEl.textContent = "Лайков: " + count;
+      likeBtn.textContent = liked ? "💖 Лайк поставлен" : "❤️ Нравится";
+    }
+
+    likeBtn.addEventListener("click", () => {
+      const liked = localStorage.getItem(likedKey) === "1";
+      let count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+
+      if (liked) {
+        count = Math.max(0, count - 1);
+        localStorage.setItem(likedKey, "0");
+      } else {
+        count += 1;
+        localStorage.setItem(likedKey, "1");
+      }
+
+      localStorage.setItem(likeKey, String(count));
+      refreshLikes();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyBtn.textContent = "✅ Ссылка скопирована";
+        setTimeout(() => {
+          copyBtn.textContent = "🔗 Копировать ссылку";
+        }, 1800);
+      } catch (e) {
+        alert("Не удалось скопировать ссылку");
+      }
+    });
+
+    refreshLikes();
+  </script>
+</body>
+</html>
