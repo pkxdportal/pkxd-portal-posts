@@ -111,11 +111,275 @@
             <input id="postImage" class="form-input" type="text" placeholder="assets/posts/..." readonly />
             <input id="imageUpload" type="file" accept="image/*" hidden />
             <button type="button" class="secondary-btn" onclick="document.getElementById('imageUpload').click()">Загрузить</button>
-[03.04.2026 9:32] TURBORAY: const loginBtn = document.getElementById("loginBtn");
+            <button type="button" class="secondary-btn" onclick="clearImage()">Убрать</button>
+          </div>
+        </label>
+
+        <div id="imagePreviewWrap" class="image-preview-wrap hidden">
+          <img id="imagePreview" class="image-preview" src="" alt="preview" />
+        </div>
+
+        <label class="form-label">
+          Текст поста
+          <textarea id="postContent" class="form-textarea" placeholder="Текст поста. Каждая новая строка станет отдельным абзацем."></textarea>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-btn" onclick="closeAdminModal()">Отмена</button>
+        <button id="savePostBtn" type="button" class="primary-btn" onclick="savePostFromModal()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminMenu" class="admin-menu hidden"></div>
+
+  <script>
+    const REPO_OWNER = "pkxdportal";
+    const REPO_NAME = "pkxd-portal-posts";
+    const DEFAULT_AUTHOR = "@pkxd_portal";
+    const SITE_URL = "https://pkxdportal.github.io/pkxd-portal-posts";
+    const LOGIN_URL = "https://pkxd-auth.turborussnezkiy.workers.dev/login";
+
+    let allPosts = [];
+    let activeMenuSlug = null;
+    let isSaving = false;
+
+    function parseDate(dateStr) {
+      if (!dateStr || typeof dateStr !== "string" || !dateStr.includes(".")) {
+        return new Date(0);
+      }
+
+      const [d, m, y] = dateStr.split(".");
+      return new Date(`${y}-${m}-${d}`);
+    }
+
+    function todayDate() {
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2, "0");
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const y = now.getFullYear();
+      return `${d}.${m}.${y}`;
+    }
+
+    function sortPosts(posts) {
+      return [...posts].sort((a, b) => {
+        const aPinned = Boolean(a?.pinned);
+        const bPinned = Boolean(b?.pinned);
+
+        if (aPinned !== bPinned) {
+          return bPinned - aPinned;
+        }
+
+        return parseDate(b?.date) - parseDate(a?.date);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(text) {
+      return String(text ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function normalizePost(post) {
+      return {
+        title: post?.title || "Без названия",
+        slug: post?.slug || "",
+        date: post?.date || "",
+        author: post?.author || DEFAULT_AUTHOR,
+        description: post?.description || "",
+        category: post?.category || "Общее",
+        pinned: Boolean(post?.pinned),
+        image: post?.image || ""
+      };
+    }
+
+    function slugify(text) {
+      return String(text || "post")
+        .toLowerCase()
+        .trim()
+        .replace(/[^\p{L}\p{N}\s-]/gu, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "") || "post";
+    }
+
+    function formatLineWithLinks(text) {
+      let escaped = escapeHtml(text);
+
+      escaped = escaped.replace(
+        /(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+      );
+
+      escaped = escaped.replace(
+        /(^|[\s>])(t\.me\/[^\s<]+)/g,
+        '$1<a href="https://$2" target="_blank" rel="noopener noreferrer">$2</a>'
+      );
+
+      return escaped;
+    }
+
+    function buildParagraphs(content) {
+      return String(content || "")
+        .split("\n")
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => `<p>${formatLineWithLinks(line)}</p>`)
+        .join("");
+    }
+
+    function renderCard(post) {
+      const safePost = normalizePost(post);
+      const isAdminMode = document.body.classList.contains("admin");
+
+      return `
+        <div class="post-card">
+          ${safePost.image ? `
+            <a class="post-card-link" href="posts/${encodeURIComponent(safePost.slug)}.html">
+              <img class="post-card-image" src="${escapeAttr(safePost.image)}" alt="${escapeAttr(safePost.title)}" />
+            </a>
+          ` : ""}
+
+          <a class="post-card-link" href="posts/${encodeURIComponent(safePost.slug)}.html">
+            <div class="post-card-top">
+              <div class="tag-row">
+                <span class="tag">${escapeHtml(safePost.category)}</span>
+                ${safePost.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
+              </div>
+            </div>
+            <h3>${escapeHtml(safePost.title)}</h3>
+            <div class="meta">Автор: ${escapeHtml(safePost.author)} · ${escapeHtml(safePost.date)}</div>
+            <p>${escapeHtml(safePost.description)}</p>
+          </a>
+
+          ${isAdminMode ? `
+            <button
+              class="post-more-btn"
+              type="button"
+              onclick="toggleAdminMenu(event, '${escapeAttr(safePost.slug)}')"
+              aria-label="Открыть меню поста"
+            >⋮</button>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    function renderPosts() {
+      closeAdminMenu();
+
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const category = document.getElementById("categoryFilter").value;
+
+      const filtered = sortPosts(allPosts).filter((rawPost) => {
+        const post = normalizePost(rawPost);
+
+        const title = post.title.toLowerCase();
+        const description = post.description.toLowerCase();
+        const postCategory = post.category.toLowerCase();
+
+        const matchSearch =
+          title.includes(search) ||
+          description.includes(search) ||
+          postCategory.includes(search);
+
+        const matchCategory =
+          category === "all" || post.category === category;
+
+        return matchSearch && matchCategory;
+      });
+
+      const pinned = filtered.filter(post => post.pinned);
+      const regular = filtered.filter(post => !post.pinned);
+
+      const pinnedSection = document.getElementById("pinnedSection");
+      const pinnedList = document.getElementById("pinnedList");
+      const postList = document.getElementById("postList");
+
+      pinnedList.innerHTML = pinned.map(renderCard).join("");
+      postList.innerHTML = regular.map(renderCard).join("");
+
+      if (pinned.length > 0) {
+        pinnedSection.classList.remove("hidden");
+      } else {
+        pinnedSection.classList.add("hidden");
+      }
+
+      if (regular.length === 0 && pinned.length === 0) {
+        postList.innerHTML = `<div class="empty-state">Ничего не найдено.</div>`;
+      }
+    }
+
+    function fillCategories(posts) {
+      const select = document.getElementById("categoryFilter");
+      select.innerHTML = `<option value="all">Все категории</option>`;
+
+      const categories = [
+        ...new Set(posts.map(post => normalizePost(post).category))
+      ].sort((a, b) => a.localeCompare(b, "ru"));
+
+      for (const cat of categories) {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      }
+    }
+
+    function login() {
+      window.location.href = LOGIN_URL;
+    }
+
+    function logout() {
+      localStorage.removeItem("gh_token");
+      localStorage.removeItem("gh_login");
+      document.body.classList.remove("admin");
+      updateAuthUI();
+      closeAdminMenu();
+      location.reload();
+    }
+
+    function readAuthFromHash() {
+      const hash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : "";
+
+      if (!hash) return;
+
+      const params = new URLSearchParams(hash);
+      const token = params.get("gh_token");
+      const login = params.get("gh_login");
+
+      if (token && login) {
+        localStorage.setItem("gh_token", token);
+        localStorage.setItem("gh_login", login);
+
+        history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
+      }
+    }
+
+    function updateAuthUI() {
+      const token = localStorage.getItem("gh_token");
+      const loginValue = localStorage.getItem("gh_login");
+
+      const loginBtn = document.getElementById("loginBtn");
       const logoutBtn = document.getElementById("logoutBtn");
       const newPostBtn = document.getElementById("newPostBtn");
 
-      if (token && login === "pkxdportal") {
+      if (token && loginValue === "pkxdportal") {
         document.body.classList.add("admin");
         loginBtn.classList.add("hidden");
         logoutBtn.classList.remove("hidden");
@@ -143,24 +407,26 @@
         throw new Error("Нет GitHub токена. Войди заново.");
       }
 
-      const response = await fetch(url, {
+      return await fetch(url, {
         ...options,
         headers: {
-          "Authorization": Bearer ${token},
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           ...(options.headers || {})
         }
       });
-
-      return response;
     }
 
     function encodeBase64Unicode(str) {
       return btoa(unescape(encodeURIComponent(str)));
     }
 
+    function decodeBase64Unicode(str) {
+      return decodeURIComponent(escape(atob(str)));
+    }
+
     async function getRepoFile(path) {
-      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
       const response = await ghFetch(url);
 
       if (response.status === 404) {
@@ -175,7 +441,7 @@
     }
 
     async function putRepoFile(path, content, message, sha = null) {
-      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
       const body = {
         message,
         content: encodeBase64Unicode(content)
@@ -202,7 +468,7 @@
     }
 
     async function putRepoBinaryFile(path, base64Content, message, sha = null) {
-      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
       const body = {
         message,
         content: base64Content
@@ -229,7 +495,7 @@
     }
 
     async function deleteRepoFile(path, message, sha) {
-      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
 
       const response = await ghFetch(url, {
         method: "DELETE",
@@ -256,13 +522,14 @@
         throw new Error("posts.json не найден");
       }
 
-      const json = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ""))));
+      const json = decodeBase64Unicode(file.content.replace(/\n/g, ""));
       return {
         data: JSON.parse(json),
         sha: file.sha
       };
     }
-[03.04.2026 9:32] TURBORAY: async function loadPostHtmlContent(slug) {
+
+    async function loadPostHtmlContent(slug) {
       const response = await fetch(`posts/${encodeURIComponent(slug)}.html?t=${Date.now()}`, {
         cache: "no-store"
       });
@@ -311,7 +578,7 @@
   <meta property="og:description" content="${escapeAttr(description)}" />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="${SITE_URL}/posts/${encodeURIComponent(slug)}.html" />
-  <meta property="og:image" content="${image ? ${SITE_URL}/${image} : `${SITE_URL}/assets/portal-badge.png`}" />
+  <meta property="og:image" content="${image ? `${SITE_URL}/${image}` : `${SITE_URL}/assets/portal-badge.png`}" />
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
@@ -323,7 +590,7 @@
 
       <div class="tag-row">
         <span class="tag">${escapeHtml(category)}</span>
-        ${pinned ? <span class="tag pin-tag">Закреплено</span> : ""}
+        ${pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
       </div>
 
       ${image ? `
@@ -384,8 +651,7 @@
         await navigator.clipboard.writeText(window.location.href);
         copyBtn.textContent = "✅ Ссылка скопирована";
         setTimeout(() => {
-          copyBtn.
-[03.04.2026 9:32] TURBORAY: textContent = "🔗 Копировать ссылку";
+          copyBtn.textContent = "🔗 Копировать ссылку";
         }, 1800);
       } catch (e) {
         alert("Не удалось скопировать ссылку");
@@ -428,8 +694,8 @@
       `;
 
       const rect = event.currentTarget.getBoundingClientRect();
-      menu.style.top = ${window.scrollY + rect.bottom + 8}px;
-      menu.style.left = ${window.scrollX + rect.right - 180}px;
+      menu.style.top = `${window.scrollY + rect.bottom + 8}px`;
+      menu.style.left = `${window.scrollX + rect.right - 180}px`;
       menu.classList.remove("hidden");
 
       activeMenuSlug = slug;
@@ -442,11 +708,12 @@
       if (!post) return;
 
       const safePost = normalizePost(post);
+      const htmlData = await loadPostHtmlContent(slug);
 
       await savePostData({
         ...safePost,
-        content: (await loadPostHtmlContent(slug)).content,
-        image: safePost.image || (await loadPostHtmlContent(slug)).image,
+        content: htmlData.content,
+        image: safePost.image || htmlData.image,
         pinned: !safePost.pinned
       }, slug);
     }
@@ -486,7 +753,7 @@
       document.getElementById("postDescription").value = safePost.description;
       document.getElementById("postCategory").value = safePost.category;
       document.getElementById("postPinned").checked = safePost.pinned;
-      document.getElementById("postImage").value = safePost.image  htmlData.image  "";
+      document.getElementById("postImage").value = safePost.image || htmlData.image || "";
       document.getElementById("postContent").value = htmlData.content || "";
       document.getElementById("imageUpload").value = "";
       updateImagePreview(document.getElementById("postImage").value);
@@ -496,7 +763,8 @@
     function closeAdminModal() {
       document.getElementById("adminModal").classList.add("hidden");
     }
-[03.04.2026 9:32] TURBORAY: function clearImage() {
+
+    function clearImage() {
       document.getElementById("postImage").value = "";
       document.getElementById("imageUpload").value = "";
       updateImagePreview("");
@@ -542,15 +810,15 @@
 
     async function uploadImageToRepo(file) {
       const ext = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "png";
-      const filename = ${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}.${ext};
-      const path = assets/posts/${filename};
+      const filename = `${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}.${ext}`;
+      const path = `assets/posts/${filename}`;
 
       const base64Content = await fileToBase64(file);
 
       await putRepoBinaryFile(
         path,
         base64Content,
-        Upload image: ${filename}
+        `Upload image: ${filename}`
       );
 
       return path;
@@ -627,7 +895,7 @@
         document.getElementById("savePostBtn").disabled = false;
         document.getElementById("savePostBtn").textContent = "Сохранить";
       }
-[03.04.2026 9:32] TURBORAY: }
+    }
 
     function firstDescriptionLine(content) {
       const line = String(content || "")
@@ -652,13 +920,13 @@
 
       if (originalSlug && originalSlug !== postData.slug && oldPostHtmlFile) {
         await deleteRepoFile(
-          posts/${oldSlug}.html,
-          Delete old slug html: ${oldSlug},
+          `posts/${oldSlug}.html`,
+          `Delete old slug html: ${oldSlug}`,
           oldPostHtmlFile.sha
         );
       }
 
-      const htmlPath = posts/${postData.slug}.html;
+      const htmlPath = `posts/${postData.slug}.html`;
       const existingHtml = await getRepoFile(htmlPath);
 
       const html = buildPostHtml(postData);
@@ -666,7 +934,7 @@
       await putRepoFile(
         htmlPath,
         html,
-        ${originalSlug ? "Update" : "Create"} post: ${postData.slug},
+        `${originalSlug ? "Update" : "Create"} post: ${postData.slug}`,
         existingHtml ? existingHtml.sha : null
       );
 
@@ -678,7 +946,7 @@
       await putRepoFile(
         "posts.json",
         JSON.stringify(sortPosts(posts), null, 2),
-        ${originalSlug ? "Update" : "Create"} posts.json: ${postData.slug},
+        `${originalSlug ? "Update" : "Create"} posts.json: ${postData.slug}`,
         postsFile.sha
       );
 
@@ -704,8 +972,8 @@
 
       if (htmlFile) {
         await deleteRepoFile(
-          posts/${slug}.html,
-          Delete post: ${slug},
+          `posts/${slug}.html`,
+          `Delete post: ${slug}`,
           htmlFile.sha
         );
       }
@@ -717,7 +985,7 @@
       await putRepoFile(
         "posts.json",
         JSON.stringify(sortPosts(nextPosts), null, 2),
-        Delete post from posts.json: ${slug},
+        `Delete post from posts.json: ${slug}`,
         postsFile.sha
       );
 
@@ -753,7 +1021,7 @@
       } catch (e) {
         document.getElementById("pinnedSection").classList.add("hidden");
         document.getElementById("postList").innerHTML =
-          <div class="empty-state">Не удалось загрузить посты.</div>;
+          `<div class="empty-state">Не удалось загрузить посты.</div>`;
         console.error("Ошибка загрузки posts.json:", e);
       }
     }
