@@ -54,8 +54,8 @@ export default {
               "Content-Type": "text/plain; charset=UTF-8"
             }
           }
-      );
-    }
+        );
+      }
 
       const userRes = await fetch("https://api.github.com/user", {
         headers: {
