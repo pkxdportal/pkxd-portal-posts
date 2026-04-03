@@ -199,6 +199,29 @@
       location.reload();
     }
 
+    function readAuthFromHash() {
+      const hash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : "";
+
+      if (!hash) return;
+
+      const params = new URLSearchParams(hash);
+      const token = params.get("gh_token");
+      const login = params.get("gh_login");
+
+      if (token && login) {
+        localStorage.setItem("gh_token", token);
+        localStorage.setItem("gh_login", login);
+
+        history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
+      }
+    }
+
     function updateAuthUI() {
       const token = localStorage.getItem("gh_token");
       const login = localStorage.getItem("gh_login");
@@ -252,6 +275,7 @@
     document.getElementById("searchInput").addEventListener("input", renderPosts);
     document.getElementById("categoryFilter").addEventListener("change", renderPosts);
 
+    readAuthFromHash();
     updateAuthUI();
     loadPosts();
   </script>
