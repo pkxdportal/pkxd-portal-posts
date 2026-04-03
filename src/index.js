@@ -46,8 +46,16 @@ export default {
       const accessToken = tokenData.access_token;
 
       if (!accessToken) {
-        return new Response("GitHub token exchange failed", { status: 401 });
-      }
+        return new Response(
+          "GitHub token exchange failed: " + JSON.stringify(tokenData, null, 2),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "text/plain; charset=UTF-8"
+            }
+          }
+      );
+    }
 
       const userRes = await fetch("https://api.github.com/user", {
         headers: {
