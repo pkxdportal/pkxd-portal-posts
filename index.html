@@ -34,8 +34,9 @@
         </div>
 
         <div class="owner-actions">
-          <button id="loginBtn" class="owner-btn" onclick="login()">Вход для владельцев</button>
-          <button id="logoutBtn" class="owner-btn hidden" onclick="logout()">Выйти</button>
+          <button id="newPostBtn" class="owner-btn hidden" type="button" onclick="openCreateModal()">+ Новый пост</button>
+          <button id="loginBtn" class="owner-btn" type="button" onclick="login()">Вход для владельцев</button>
+          <button id="logoutBtn" class="owner-btn hidden" type="button" onclick="logout()">Выйти</button>
         </div>
       </div>
 
@@ -66,178 +67,663 @@
     </main>
   </div>
 
-  <script>
-    let allPosts = [];
+  <div id="adminModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modalTitle">Новый пост</h2>
+        <button class="modal-close" type="button" onclick="closeAdminModal()">✕</button>
+      </div>
 
-    function parseDate(dateStr) {
-      if (!dateStr || typeof dateStr !== "string" || !dateStr.includes(".")) {
-        return new Date(0);
-      }
+      <div class="modal-body">
+        <input type="hidden" id="postMode" value="create" />
+        <input type="hidden" id="postOriginalSlug" value="" />
 
-      const [d, m, y] = dateStr.split(".");
-      return new Date(`${y}-${m}-${d}`);
-    }
+        <label class="form-label">
+          Slug
+          <input id="postSlug" class="form-input" type="text" placeholder="dobro-pozhalovat-v-portal" />
+        </label>
 
-    function sortPosts(posts) {
-      return [...posts].sort((a, b) => {
-        const aPinned = Boolean(a?.pinned);
-        const bPinned = Boolean(b?.pinned);
+        <label class="form-label">
+          Заголовок
+          <input id="postTitle" class="form-input" type="text" placeholder="Заголовок поста" />
+        </label>
 
-        if (aPinned !== bPinned) {
-          return bPinned - aPinned;
-        }
+        <label class="form-label">
+          Краткое описание
+          <input id="postDescription" class="form-input" type="text" placeholder="Краткий текст для карточки" />
+        </label>
 
-        return parseDate(b?.date) - parseDate(a?.date);
-      });
-    }
+        <div class="form-grid">
+          <label class="form-label">
+            Категория
+            <input id="postCategory" class="form-input" type="text" placeholder="Новости" />
+          </label>
 
-    function escapeHtml(text) {
-      return String(text ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
+          <label class="form-label checkbox-label">
+            <input id="postPinned" type="checkbox" />
+            <span>Закрепить пост</span>
+          </label>
+        </div>
 
-    function normalizePost(post) {
-      return {
-        title: post?.title || "Без названия",
-        slug: post?.slug || "",
-        date: post?.date || "",
-        author: post?.author || "@pkxd_portal",
-        description: post?.description || "",
-        category: post?.category || "Общее",
-        pinned: Boolean(post?.pinned)
-      };
-    }
-
-    function renderCard(post) {
-      const safePost = normalizePost(post);
-
-      return `
-        <a class="post-card" href="posts/${encodeURIComponent(safePost.slug)}.html">
-          <div class="post-card-top">
-            <div class="tag-row">
-              <span class="tag">${escapeHtml(safePost.category)}</span>
-              ${safePost.pinned ? `<span class="tag pin-tag">Закреплено</span>` : ""}
-            </div>
-          </div>
-          <h3>${escapeHtml(safePost.title)}</h3>
-          <div class="meta">Автор: ${escapeHtml(safePost.author)} · ${escapeHtml(safePost.date)}</div>
-          <p>${escapeHtml(safePost.description)}</p>
-        </a>
-      `;
-    }
-
-    function renderPosts() {
-      const search = document.getElementById("searchInput").value.trim().toLowerCase();
-      const category = document.getElementById("categoryFilter").value;
-
-      const filtered = sortPosts(allPosts).filter((rawPost) => {
-        const post = normalizePost(rawPost);
-
-        const title = post.title.toLowerCase();
-        const description = post.description.toLowerCase();
-        const postCategory = post.category.toLowerCase();
-
-        const matchSearch =
-          title.includes(search) ||
-          description.includes(search) ||
-          postCategory.includes(search);
-
-        const matchCategory =
-          category === "all" || post.category === category;
-
-        return matchSearch && matchCategory;
-      });
-
-      const pinned = filtered.filter(post => post.pinned);
-      const regular = filtered.filter(post => !post.pinned);
-
-      const pinnedSection = document.getElementById("pinnedSection");
-      const pinnedList = document.getElementById("pinnedList");
-      const postList = document.getElementById("postList");
-
-      pinnedList.innerHTML = pinned.map(renderCard).join("");
-      postList.innerHTML = regular.map(renderCard).join("");
-
-      if (pinned.length > 0) {
-        pinnedSection.classList.remove("hidden");
-      } else {
-        pinnedSection.classList.add("hidden");
-      }
-
-      if (regular.length === 0 && pinned.length === 0) {
-        postList.innerHTML = `<div class="empty-state">Ничего не найдено.</div>`;
-      }
-    }
-
-    function fillCategories(posts) {
-      const select = document.getElementById("categoryFilter");
-      select.innerHTML = `<option value="all">Все категории</option>`;
-
-      const categories = [
-        ...new Set(posts.map(post => normalizePost(post).category))
-      ].sort((a, b) => a.localeCompare(b, "ru"));
-
-      for (const cat of categories) {
-        const option = document.createElement("option");
-        option.value = cat;
-        option.textContent = cat;
-        select.appendChild(option);
-      }
-    }
-
-    function login() {
-      window.location.href = "https://pkxd-auth.turborussnezkiy.workers.dev/login";
-    }
-
-    function logout() {
-      localStorage.removeItem("gh_token");
-      localStorage.removeItem("gh_login");
-      document.body.classList.remove("admin");
-      updateAuthUI();
-      location.reload();
-    }
-
-    function readAuthFromHash() {
-      const hash = window.location.hash.startsWith("#")
-        ? window.location.hash.slice(1)
-        : "";
-
-      if (!hash) return;
-
-      const params = new URLSearchParams(hash);
-      const token = params.get("gh_token");
-      const login = params.get("gh_login");
-
-      if (token && login) {
-        localStorage.setItem("gh_token", token);
-        localStorage.setItem("gh_login", login);
-
-        history.replaceState(
-          null,
-          "",
-          window.location.pathname + window.location.search
-        );
-      }
-    }
-
-    function updateAuthUI() {
-      const token = localStorage.getItem("gh_token");
-      const login = localStorage.getItem("gh_login");
-
-      const loginBtn = document.getElementById("loginBtn");
+        <label class="form-label">
+          Картинка поста
+          <div class="image-tools">
+            <input id="postImage" class="form-input" type="text" placeholder="assets/posts/..." readonly />
+            <input id="imageUpload" type="file" accept="image/*" hidden />
+            <button type="button" class="secondary-btn" onclick="document.getElementById('imageUpload').click()">Загрузить</button>
+[03.04.2026 9:32] TURBORAY: const loginBtn = document.getElementById("loginBtn");
       const logoutBtn = document.getElementById("logoutBtn");
+      const newPostBtn = document.getElementById("newPostBtn");
 
       if (token && login === "pkxdportal") {
         document.body.classList.add("admin");
         loginBtn.classList.add("hidden");
         logoutBtn.classList.remove("hidden");
+        newPostBtn.classList.remove("hidden");
       } else {
         document.body.classList.remove("admin");
         loginBtn.classList.remove("hidden");
         logoutBtn.classList.add("hidden");
+        newPostBtn.classList.add("hidden");
       }
+    }
+
+    function isAdmin() {
+      return document.body.classList.contains("admin");
+    }
+
+    function getToken() {
+      return localStorage.getItem("gh_token") || "";
+    }
+
+    async function ghFetch(url, options = {}) {
+      const token = getToken();
+
+      if (!token) {
+        throw new Error("Нет GitHub токена. Войди заново.");
+      }
+
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          "Authorization": Bearer ${token},
+          "Accept": "application/vnd.github+json",
+          ...(options.headers || {})
+        }
+      });
+
+      return response;
+    }
+
+    function encodeBase64Unicode(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    async function getRepoFile(path) {
+      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const response = await ghFetch(url);
+
+      if (response.status === 404) {
+        return null;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Ошибка чтения ${path}: HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    }
+
+    async function putRepoFile(path, content, message, sha = null) {
+      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const body = {
+        message,
+        content: encodeBase64Unicode(content)
+      };
+
+      if (sha) {
+        body.sha = sha;
+      }
+
+      const response = await ghFetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Ошибка записи ${path}: HTTP ${response.status}\n${text}`);
+      }
+
+      return await response.json();
+    }
+
+    async function putRepoBinaryFile(path, base64Content, message, sha = null) {
+      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+      const body = {
+        message,
+        content: base64Content
+      };
+
+      if (sha) {
+        body.sha = sha;
+      }
+
+      const response = await ghFetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Ошибка загрузки файла ${path}: HTTP ${response.status}\n${text}`);
+      }
+
+      return await response.json();
+    }
+
+    async function deleteRepoFile(path, message, sha) {
+      const url = https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path};
+
+      const response = await ghFetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message,
+          sha
+        })
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Ошибка удаления ${path}: HTTP ${response.status}\n${text}`);
+      }
+
+      return await response.json();
+    }
+
+    async function loadPostsJsonFromRepo() {
+      const file = await getRepoFile("posts.json");
+      if (!file) {
+        throw new Error("posts.json не найден");
+      }
+
+      const json = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ""))));
+      return {
+        data: JSON.parse(json),
+        sha: file.sha
+      };
+    }
+[03.04.2026 9:32] TURBORAY: async function loadPostHtmlContent(slug) {
+      const response = await fetch(`posts/${encodeURIComponent(slug)}.html?t=${Date.now()}`, {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        return {
+          content: "",
+          image: ""
+        };
+      }
+
+      const html = await response.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+
+      const paragraphs = [...doc.querySelectorAll(".post-content p")]
+        .map(p => p.textContent.trim())
+        .filter(Boolean);
+
+      const imageEl = doc.querySelector(".post-cover img");
+      const image = imageEl ? imageEl.getAttribute("src").replace("../", "") : "";
+
+      return {
+        content: paragraphs.join("\n"),
+        image
+      };
+    }
+
+    function buildPostHtml(post) {
+      const title = post.title || "Без названия";
+      const description = post.description || "";
+      const slug = post.slug;
+      const category = post.category || "Общее";
+      const pinned = Boolean(post.pinned);
+      const date = post.date || todayDate();
+      const image = post.image || "";
+      const content = post.content || "";
+
+      return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeAttr(description)}" />
+  <meta property="og:title" content="${escapeAttr(title)}" />
+  <meta property="og:description" content="${escapeAttr(description)}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="${SITE_URL}/posts/${encodeURIComponent(slug)}.html" />
+  <meta property="og:image" content="${image ? ${SITE_URL}/${image} : `${SITE_URL}/assets/portal-badge.png`}" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="post-page-wrap">
+    <div class="post-page">
+      <a class="back-link" href="../index.html">← Назад</a>
+
+      <div class="tag-row">
+        <span class="tag">${escapeHtml(category)}</span>
+        ${pinned ? <span class="tag pin-tag">Закреплено</span> : ""}
+      </div>
+
+      ${image ? `
+        <div class="post-cover">
+          <img src="../${escapeAttr(image)}" alt="${escapeAttr(title)}" />
+        </div>
+      ` : ""}
+
+      <h1>${escapeHtml(title)}</h1>
+      <div class="meta">Автор: ${escapeHtml(DEFAULT_AUTHOR)} · ${escapeHtml(date)}</div>
+
+      <div class="post-content">
+        ${buildParagraphs(content)}
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" id="likeBtn">❤️ Нравится</button>
+        <button class="action-btn" id="copyBtn">🔗 Копировать ссылку</button>
+        <span class="like-count" id="likeCount">Лайков: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slug = ${JSON.stringify(slug)};
+    const likeKey = "likes_" + slug;
+    const likedKey = "liked_" + slug;
+
+    const countEl = document.getElementById("likeCount");
+    const likeBtn = document.getElementById("likeBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function refreshLikes() {
+      const count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+      const liked = localStorage.getItem(likedKey) === "1";
+      countEl.textContent = "Лайков: " + count;
+      likeBtn.textContent = liked ? "💖 Лайк поставлен" : "❤️ Нравится";
+    }
+
+    likeBtn.addEventListener("click", () => {
+      const liked = localStorage.getItem(likedKey) === "1";
+      let count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+
+      if (liked) {
+        count = Math.max(0, count - 1);
+        localStorage.setItem(likedKey, "0");
+      } else {
+        count += 1;
+        localStorage.setItem(likedKey, "1");
+      }
+
+      localStorage.setItem(likeKey, String(count));
+      refreshLikes();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyBtn.textContent = "✅ Ссылка скопирована";
+        setTimeout(() => {
+          copyBtn.
+[03.04.2026 9:32] TURBORAY: textContent = "🔗 Копировать ссылку";
+        }, 1800);
+      } catch (e) {
+        alert("Не удалось скопировать ссылку");
+      }
+    });
+
+    refreshLikes();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function closeAdminMenu() {
+      const menu = document.getElementById("adminMenu");
+      menu.classList.add("hidden");
+      menu.innerHTML = "";
+      activeMenuSlug = null;
+    }
+
+    function toggleAdminMenu(event, slug) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const menu = document.getElementById("adminMenu");
+
+      if (activeMenuSlug === slug && !menu.classList.contains("hidden")) {
+        closeAdminMenu();
+        return;
+      }
+
+      const post = allPosts.find(item => normalizePost(item).slug === slug);
+      if (!post) return;
+
+      const safePost = normalizePost(post);
+
+      menu.innerHTML = `
+        <button type="button" onclick="editPost('${escapeAttr(safePost.slug)}')">Редактировать</button>
+        <button type="button" onclick="togglePinPost('${escapeAttr(safePost.slug)}')">${safePost.pinned ? "Открепить" : "Закрепить"}</button>
+        <button type="button" class="danger-btn" onclick="deletePost('${escapeAttr(safePost.slug)}')">Удалить</button>
+      `;
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      menu.style.top = ${window.scrollY + rect.bottom + 8}px;
+      menu.style.left = ${window.scrollX + rect.right - 180}px;
+      menu.classList.remove("hidden");
+
+      activeMenuSlug = slug;
+    }
+
+    async function togglePinPost(slug) {
+      closeAdminMenu();
+
+      const post = allPosts.find(item => normalizePost(item).slug === slug);
+      if (!post) return;
+
+      const safePost = normalizePost(post);
+
+      await savePostData({
+        ...safePost,
+        content: (await loadPostHtmlContent(slug)).content,
+        image: safePost.image || (await loadPostHtmlContent(slug)).image,
+        pinned: !safePost.pinned
+      }, slug);
+    }
+
+    function openCreateModal() {
+      if (!isAdmin()) return;
+
+      document.getElementById("modalTitle").textContent = "Новый пост";
+      document.getElementById("postMode").value = "create";
+      document.getElementById("postOriginalSlug").value = "";
+      document.getElementById("postSlug").value = "";
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postDescription").value = "";
+      document.getElementById("postCategory").value = "Общее";
+      document.getElementById("postPinned").checked = false;
+      document.getElementById("postImage").value = "";
+      document.getElementById("postContent").value = "";
+      document.getElementById("imageUpload").value = "";
+      updateImagePreview("");
+      document.getElementById("adminModal").classList.remove("hidden");
+    }
+
+    async function editPost(slug) {
+      closeAdminMenu();
+
+      const post = allPosts.find(item => normalizePost(item).slug === slug);
+      if (!post) return;
+
+      const safePost = normalizePost(post);
+      const htmlData = await loadPostHtmlContent(slug);
+
+      document.getElementById("modalTitle").textContent = "Редактировать пост";
+      document.getElementById("postMode").value = "edit";
+      document.getElementById("postOriginalSlug").value = safePost.slug;
+      document.getElementById("postSlug").value = safePost.slug;
+      document.getElementById("postTitle").value = safePost.title;
+      document.getElementById("postDescription").value = safePost.description;
+      document.getElementById("postCategory").value = safePost.category;
+      document.getElementById("postPinned").checked = safePost.pinned;
+      document.getElementById("postImage").value = safePost.image  htmlData.image  "";
+      document.getElementById("postContent").value = htmlData.content || "";
+      document.getElementById("imageUpload").value = "";
+      updateImagePreview(document.getElementById("postImage").value);
+      document.getElementById("adminModal").classList.remove("hidden");
+    }
+
+    function closeAdminModal() {
+      document.getElementById("adminModal").classList.add("hidden");
+    }
+[03.04.2026 9:32] TURBORAY: function clearImage() {
+      document.getElementById("postImage").value = "";
+      document.getElementById("imageUpload").value = "";
+      updateImagePreview("");
+    }
+
+    function updateImagePreview(src) {
+      const wrap = document.getElementById("imagePreviewWrap");
+      const img = document.getElementById("imagePreview");
+
+      if (src) {
+        img.src = src;
+        wrap.classList.remove("hidden");
+      } else {
+        img.src = "";
+        wrap.classList.add("hidden");
+      }
+    }
+
+    document.addEventListener("click", (event) => {
+      const menu = document.getElementById("adminMenu");
+      if (!menu.contains(event.target) && !event.target.classList.contains("post-more-btn")) {
+        closeAdminMenu();
+      }
+    });
+
+    document.getElementById("imageUpload").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (!isAdmin()) {
+        alert("Нет доступа.");
+        return;
+      }
+
+      try {
+        const uploadedPath = await uploadImageToRepo(file);
+        document.getElementById("postImage").value = uploadedPath;
+        updateImagePreview(uploadedPath);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    async function uploadImageToRepo(file) {
+      const ext = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "png";
+      const filename = ${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}.${ext};
+      const path = assets/posts/${filename};
+
+      const base64Content = await fileToBase64(file);
+
+      await putRepoBinaryFile(
+        path,
+        base64Content,
+        Upload image: ${filename}
+      );
+
+      return path;
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          const base64 = result.split(",")[1] || "";
+          resolve(base64);
+        };
+
+        reader.onerror = () => reject(new Error("Не удалось прочитать файл."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function savePostFromModal() {
+      if (isSaving) return;
+      if (!isAdmin()) {
+        alert("Нет доступа.");
+        return;
+      }
+
+      const mode = document.getElementById("postMode").value;
+      const originalSlug = document.getElementById("postOriginalSlug").value.trim();
+      const slugInput = document.getElementById("postSlug").value.trim();
+      const title = document.getElementById("postTitle").value.trim();
+      const description = document.getElementById("postDescription").value.trim();
+      const category = document.getElementById("postCategory").value.trim() || "Общее";
+      const pinned = document.getElementById("postPinned").checked;
+      const image = document.getElementById("postImage").value.trim();
+      const content = document.getElementById("postContent").value.trim();
+
+      if (!title) {
+        alert("Нужен заголовок.");
+        return;
+      }
+
+      const slug = slugInput || slugify(title);
+
+      if (!slug) {
+        alert("Не удалось сформировать slug.");
+        return;
+      }
+
+      isSaving = true;
+      document.getElementById("savePostBtn").disabled = true;
+      document.getElementById("savePostBtn").textContent = "Сохранение...";
+
+      try {
+        await savePostData({
+          title,
+          slug,
+          date: mode === "edit"
+            ? (allPosts.find(p => normalizePost(p).slug === originalSlug)?.date || todayDate())
+            : todayDate(),
+          author: DEFAULT_AUTHOR,
+          description: description || firstDescriptionLine(content),
+          category,
+          pinned,
+          image,
+          content
+        }, mode === "edit" ? originalSlug : null);
+
+        closeAdminModal();
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        isSaving = false;
+        document.getElementById("savePostBtn").disabled = false;
+        document.getElementById("savePostBtn").textContent = "Сохранить";
+      }
+[03.04.2026 9:32] TURBORAY: }
+
+    function firstDescriptionLine(content) {
+      const line = String(content || "")
+        .split("\n")
+        .map(item => item.trim())
+        .find(Boolean);
+
+      return line ? line.slice(0, 160) : "";
+    }
+
+    async function savePostData(postData, originalSlug = null) {
+      const postsFile = await loadPostsJsonFromRepo();
+      let posts = Array.isArray(postsFile.data) ? postsFile.data.map(normalizePost) : [];
+
+      const existingByNewSlug = posts.find(item => item.slug === postData.slug);
+      if (existingByNewSlug && (!originalSlug || existingByNewSlug.slug !== originalSlug)) {
+        throw new Error("Пост с таким slug уже существует.");
+      }
+
+      const oldSlug = originalSlug || postData.slug;
+      const oldPostHtmlFile = await getRepoFile(`posts/${oldSlug}.html`);
+
+      if (originalSlug && originalSlug !== postData.slug && oldPostHtmlFile) {
+        await deleteRepoFile(
+          posts/${oldSlug}.html,
+          Delete old slug html: ${oldSlug},
+          oldPostHtmlFile.sha
+        );
+      }
+
+      const htmlPath = posts/${postData.slug}.html;
+      const existingHtml = await getRepoFile(htmlPath);
+
+      const html = buildPostHtml(postData);
+
+      await putRepoFile(
+        htmlPath,
+        html,
+        ${originalSlug ? "Update" : "Create"} post: ${postData.slug},
+        existingHtml ? existingHtml.sha : null
+      );
+
+      const normalized = normalizePost(postData);
+
+      posts = posts.filter(item => item.slug !== oldSlug);
+      posts.push(normalized);
+
+      await putRepoFile(
+        "posts.json",
+        JSON.stringify(sortPosts(posts), null, 2),
+        ${originalSlug ? "Update" : "Create"} posts.json: ${postData.slug},
+        postsFile.sha
+      );
+
+      allPosts = sortPosts(posts);
+      fillCategories(allPosts);
+      renderPosts();
+    }
+
+    async function deletePost(slug) {
+      closeAdminMenu();
+
+      if (!isAdmin()) {
+        alert("Нет доступа.");
+        return;
+      }
+
+      if (!confirm(`Удалить пост "${slug}"?`)) {
+        return;
+      }
+
+      const postsFile = await loadPostsJsonFromRepo();
+      const htmlFile = await getRepoFile(`posts/${slug}.html`);
+
+      if (htmlFile) {
+        await deleteRepoFile(
+          posts/${slug}.html,
+          Delete post: ${slug},
+          htmlFile.sha
+        );
+      }
+
+      const nextPosts = postsFile.data
+        .map(normalizePost)
+        .filter(item => item.slug !== slug);
+
+      await putRepoFile(
+        "posts.json",
+        JSON.stringify(sortPosts(nextPosts), null, 2),
+        Delete post from posts.json: ${slug},
+        postsFile.sha
+      );
+
+      allPosts = sortPosts(nextPosts);
+      fillCategories(allPosts);
+      renderPosts();
     }
 
     async function loadPosts() {
@@ -267,7 +753,7 @@
       } catch (e) {
         document.getElementById("pinnedSection").classList.add("hidden");
         document.getElementById("postList").innerHTML =
-          `<div class="empty-state">Не удалось загрузить посты.</div>`;
+          <div class="empty-state">Не удалось загрузить посты.</div>;
         console.error("Ошибка загрузки posts.json:", e);
       }
     }
