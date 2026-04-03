@@ -2,6 +2,17 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/login-test") {
+      return new Response(
+        "CLIENT_ID=" + env.GITHUB_CLIENT_ID,
+        {
+          headers: {
+            "Content-Type": "text/plain; charset=UTF-8"
+          }
+        }
+      );
+    }
+
     if (url.pathname === "/login") {
       const loginUrl =
         "https://github.com/login/oauth/authorize?client_id=" +
@@ -41,7 +52,8 @@ export default {
       const userRes = await fetch("https://api.github.com/user", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
-          "User-Agent": "pkxd-auth-worker"
+          "User-Agent": "pkxd-auth-worker",
+          "Accept": "application/vnd.github+json"
         }
       });
 
@@ -54,7 +66,11 @@ export default {
       return new Response(
         `
         <!doctype html>
-        <html>
+        <html lang="ru">
+          <head>
+            <meta charset="UTF-8" />
+            <title>Авторизация...</title>
+          </head>
           <body>
             <script>
               localStorage.setItem("gh_token", ${JSON.stringify(accessToken)});
