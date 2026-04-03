@@ -18,15 +18,5 @@
     "category": "Помощь порталу",
     "pinned": false,
     "image": ""
-  },
-  {
-    "title": "Тестовый пост",
-    "slug": "example",
-    "date": "31.03.2026",
-    "author": "@pkxd_portal",
-    "description": "Это первый тестовый пост. Если ты это видишь — сайт работает правильно.",
-    "category": "Общее",
-    "pinned": false,
-    "image": ""
   }
 ]
