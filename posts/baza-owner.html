@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>БАЗА ВЛАДЕЛЬЦА PK XD PORTAL</title>
+  <meta name="description" content="Как стать владельцем в PK XD PORTAL" />
+  <meta property="og:title" content="БАЗА ВЛАДЕЛЬЦА PK XD PORTAL" />
+  <meta property="og:description" content="Как стать владельцем в PK XD PORTAL" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://pkxdportal.github.io/pkxd-portal-posts/posts/baza-owner.html" />
+  <meta property="og:image" content="https://pkxdportal.github.io/pkxd-portal-posts/assets/portal-badge.png" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="post-page-wrap">
+    <div class="post-page">
+      <a class="back-link" href="../index.html">← Назад</a>
+
+      <div class="tag-row">
+        <span class="tag">Помощь порталу</span>
+        
+      </div>
+
+      
+
+      <h1>БАЗА ВЛАДЕЛЬЦА PK XD PORTAL</h1>
+      <div class="meta">Автор: @pkxd_portal · 03.04.2026</div>
+
+      <div class="post-content">
+        <p>1. Кто такой Владелец</p><p>Владелец — это лидер направления Портала.</p><p>Он не “главный”, а ответственный за развитие и порядок в своём направлении.</p><p>Владельцы создают идеи, события и помогают Порталу расти.</p><p>Ты не просто участник команды — ты создаёшь будущее Портала.</p><p>2. Правила владельцев</p><p>➤ Если ты 2 недели ничего не делал для Портала — происходит понижение до Архонта</p><p>➤ Вернуться в роль владельца можно через 4 недели, если снова пройдён тест и стажировка</p><p>➤ Можно взять отдых 1 неделю в месяц, предупредив команду заранее</p><p>➤ Запрещено сливать внутреннюю информацию, посты и материалы участникам</p><p>➤ Запрещена токсичность и конфликты внутри команды владельцев</p><p>➤ Все спорные ситуации решаются спокойно и через обсуждение</p><p>3. Роли Владельцев</p><p>Каждый владелец выбирает 1–2 направления, за которые он отвечает.</p><p>➤ Дизайнер</p><p>Создаёт визуалы: аватарки, баннеры, карточки и другие материалы. Следит за стилем Портала.</p><p>➤ Событие-мейкер</p><p>Придумывает события, задания, героев и злодеев. Создаёт атмосферу и сюжет ивентов.</p><p>➤ Инфо-куратор</p><p>Публикует новости от лица Пикси, делает спойлеры, обновления и важные информационные посты.</p><p>➤ Питомцевед</p><p>Следит за информацией о питомцах PK XD. Делает посты для трейд-канала и помогает с трейдами, обменами и ценностью питомцев.</p><p>4. Стандарты работы</p><p>Каждый владелец обязан:</p><p>➤ Работать по дедлайнам</p><p>➤ Делать вклад в развитие Портала каждую неделю</p><p>➤ Следить за качеством контента и идей</p><p>➤ Помогать другим ролям и поддерживать команду</p><p>5. KPI Владельца</p><p>Хороший владелец:</p><p>➤ Активен</p><p>➤ Выполняет задачи вовремя</p><p>➤ Не исчезает без предупреждения</p><p>➤ Предлагает идеи и улучшения</p><p>➤ Помогает системе развиваться</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" id="likeBtn">❤️ Нравится</button>
+        <button class="action-btn" id="copyBtn">🔗 Копировать ссылку</button>
+        <span class="like-count" id="likeCount">Лайков: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slug = "baza-owner";
+    const likeKey = "likes_" + slug;
+    const likedKey = "liked_" + slug;
+
+    const countEl = document.getElementById("likeCount");
+    const likeBtn = document.getElementById("likeBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function refreshLikes() {
+      const count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+      const liked = localStorage.getItem(likedKey) === "1";
+      countEl.textContent = "Лайков: " + count;
+      likeBtn.textContent = liked ? "💖 Лайк поставлен" : "❤️ Нравится";
+    }
+
+    likeBtn.addEventListener("click", () => {
+      const liked = localStorage.getItem(likedKey) === "1";
+      let count = parseInt(localStorage.getItem(likeKey) || "0", 10);
+
+      if (liked) {
+        count = Math.max(0, count - 1);
+        localStorage.setItem(likedKey, "0");
+      } else {
+        count += 1;
+        localStorage.setItem(likedKey, "1");
+      }
+
+      localStorage.setItem(likeKey, String(count));
+      refreshLikes();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyBtn.textContent = "✅ Ссылка скопирована";
+        setTimeout(() => {
+          copyBtn.textContent = "🔗 Копировать ссылку";
+        }, 1800);
+      } catch (e) {
+        alert("Не удалось скопировать ссылку");
+      }
+    });
+
+    refreshLikes();
+  </script>
+</body>
+</html>
