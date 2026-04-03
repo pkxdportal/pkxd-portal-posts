@@ -1,0 +1,7 @@
+name = "pkxd-auth"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+
+[vars]
+GITHUB_CLIENT_ID = "Iv23liZy53NW5ScRvTCZ"
+ALLOWED_GITHUB_LOGIN = "pkxdportal"
