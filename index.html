@@ -21,14 +21,21 @@
   <div class="container">
     <header class="hero">
       <div class="hero-top">
-        <img
-          src="assets/portal-badge.png"
-          alt="Portal"
-          class="hero-icon"
-        />
-        <div>
-          <h1>PK XD PORTAL</h1>
-          <p class="subtitle">Посты и новости</p>
+        <div class="hero-title-wrap">
+          <img
+            src="assets/portal-badge.png"
+            alt="Portal"
+            class="hero-icon"
+          />
+          <div>
+            <h1>PK XD PORTAL</h1>
+            <p class="subtitle">Посты и новости</p>
+          </div>
+        </div>
+
+        <div class="owner-actions">
+          <button id="loginBtn" class="owner-btn" onclick="login()">Вход для владельцев</button>
+          <button id="logoutBtn" class="owner-btn hidden" onclick="logout()">Выйти</button>
         </div>
       </div>
 
@@ -96,7 +103,7 @@
         title: post?.title || "Без названия",
         slug: post?.slug || "",
         date: post?.date || "",
-        author: post?.author || "@pkxdportal",
+        author: post?.author || "@pkxd_portal",
         description: post?.description || "",
         category: post?.category || "Общее",
         pinned: Boolean(post?.pinned)
@@ -180,6 +187,36 @@
       }
     }
 
+    function login() {
+      window.location.href = "https://YOUR-WORKER.workers.dev/login";
+    }
+
+    function logout() {
+      localStorage.removeItem("gh_token");
+      localStorage.removeItem("gh_login");
+      document.body.classList.remove("admin");
+      updateAuthUI();
+      location.reload();
+    }
+
+    function updateAuthUI() {
+      const token = localStorage.getItem("gh_token");
+      const login = localStorage.getItem("gh_login");
+
+      const loginBtn = document.getElementById("loginBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      if (token && login === "pkxdportal") {
+        document.body.classList.add("admin");
+        loginBtn.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
+      } else {
+        document.body.classList.remove("admin");
+        loginBtn.classList.remove("hidden");
+        logoutBtn.classList.add("hidden");
+      }
+    }
+
     async function loadPosts() {
       try {
         const response = await fetch(`posts.json?t=${Date.now()}`, {
@@ -215,6 +252,7 @@
     document.getElementById("searchInput").addEventListener("input", renderPosts);
     document.getElementById("categoryFilter").addEventListener("change", renderPosts);
 
+    updateAuthUI();
     loadPosts();
   </script>
 </body>
